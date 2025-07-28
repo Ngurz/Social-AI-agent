@@ -1,1 +1,28 @@
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const { OpenAI } = require('openai');
 
+const app = express();
+const port = 3001;
+const openai = new OpenAI({ apiKey: 'YOUR_OPENAI_API_KEY' });
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.post('/api/chat', async (req, res) => {
+  const prompt = req.body.prompt;
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }]
+    });
+    res.json({ response: chatCompletion.choices[0].message.content });
+  } catch (error) {
+    res.status(500).send('Error with OpenAI');
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
